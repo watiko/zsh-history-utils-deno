@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "@std/io/": "https://deno.land/std@0.117.0/io/",
+    "@std/testing/": "https://deno.land/std@0.117.0/testing/"
+  }
+}

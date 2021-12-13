@@ -1,6 +1,10 @@
 import { assertEquals } from "@std/testing/asserts.ts";
 import { StringReader } from "@std/io/mod.ts";
-import { readHistoryLines } from "./zsh-history.ts";
+import {
+  historyEntriesToBytes,
+  HistoryEntry,
+  readHistoryLines,
+} from "./zsh-history.ts";
 
 function toString(arr: Uint8Array): string {
   const decoder = new TextDecoder("utf-8");
@@ -14,6 +18,28 @@ async function genToArray(gen: AsyncIterable<Uint8Array>): Promise<string[]> {
   }
   return ret;
 }
+
+Deno.test("simple entry", () => {
+  const entry: HistoryEntry = {
+    command: "sleep 2",
+    startTime: 1639320933,
+    finishTime: 1639320935,
+  };
+  const encoded = historyEntriesToBytes(entry);
+
+  assertEquals(toString(encoded), ": 1639320933:2;sleep 2\n");
+});
+
+Deno.test("multi line entry", () => {
+  const entry: HistoryEntry = {
+    command: "echo one \\\n  echo two",
+    startTime: 1111,
+    finishTime: 1111,
+  };
+  const encoded = historyEntriesToBytes(entry);
+
+  assertEquals(toString(encoded), ": 1111:0;echo one \\\\\n  echo two\n");
+});
 
 Deno.test("simple", async () => {
   const histories = [

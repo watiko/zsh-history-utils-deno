@@ -1,9 +1,45 @@
 import { Buffer, BufReader } from "@std/io/buffer.ts";
-import type { Reader } from "@std/io/types.d.ts";
+import { StringReader } from "@std/io/mod.ts";
+import type { Reader, Writer } from "@std/io/types.d.ts";
 
 const LF = "\n".charCodeAt(0);
 const BACKSLASH = "\\".charCodeAt(0);
 const SPACE = " ".charCodeAt(0);
+
+export interface HistoryEntry {
+  command: string;
+  startTime: number;
+  finishTime: number;
+}
+
+export function historyEntriesToBytes(entry: HistoryEntry): Uint8Array {
+  const duration = entry.finishTime - entry.startTime;
+  if (duration < 0) {
+    throw new Error("negative duration detected");
+  }
+
+  const header = `: ${entry.startTime}:${duration};`;
+  const line = `${header}${entry.command}`;
+
+  const reader = new StringReader(line);
+  const buffer: number[] = [];
+  let endBackslashed = false;
+  for (const t of reader.bytes({ copy: false })) {
+    endBackslashed = t === BACKSLASH || (endBackslashed && t == SPACE);
+
+    if (t === LF) {
+      buffer.push(BACKSLASH);
+    }
+    buffer.push(t);
+  }
+
+  if (endBackslashed) {
+    buffer.push(SPACE);
+  }
+  buffer.push(LF);
+
+  return Uint8Array.from(buffer);
+}
 
 // line separator: CRLF or LF
 async function* readLines(reader: Reader): AsyncGenerator<Uint8Array> {

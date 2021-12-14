@@ -3,8 +3,15 @@ import { StringReader } from "@std/io/mod.ts";
 import {
   historyEntriesToBytes,
   HistoryEntry,
+  metafy,
   readHistoryLines,
+  unmetafy,
 } from "./zsh-history.ts";
+
+function fromString(str: string): Uint8Array {
+  const encoder = new TextEncoder();
+  return encoder.encode(str);
+}
 
 function toString(arr: Uint8Array): string {
   const decoder = new TextDecoder("utf-8");
@@ -18,6 +25,46 @@ async function genToArray(gen: AsyncIterable<Uint8Array>): Promise<string[]> {
   }
   return ret;
 }
+
+const metaTests = [
+  {
+    name: "dragon",
+    metafied: Uint8Array.of(240, 131, 191, 131, 176, 178),
+    unmetafied: fromString("🐲"),
+  },
+  {
+    name: "family",
+    // deno-fmt-ignore
+    metafied: Uint8Array.of(
+      240, 131, 191, 131,
+      177, 168, 226, 128,
+      131, 173, 240, 131,
+      191, 131, 177, 168,
+      226, 128, 131, 173,
+      240, 131, 191, 131,
+      177, 167, 226, 128,
+      131, 173, 240, 131,
+      191, 131, 177, 166
+    ),
+    unmetafied: fromString("👨‍👨‍👧‍👦"),
+  },
+];
+
+Deno.test("metafy", async (t) => {
+  for (const tt of metaTests) {
+    await t.step(tt.name, () => {
+      assertEquals(metafy(tt.unmetafied), tt.metafied);
+    });
+  }
+});
+
+Deno.test("unmetafy", async (t) => {
+  for (const tt of metaTests) {
+    await t.step(tt.name, () => {
+      assertEquals(unmetafy(tt.metafied), tt.unmetafied);
+    });
+  }
+});
 
 Deno.test("simple entry", () => {
   const entry: HistoryEntry = {

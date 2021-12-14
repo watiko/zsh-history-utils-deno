@@ -1,10 +1,78 @@
 import { Buffer, BufReader } from "@std/io/buffer.ts";
 import { StringReader } from "@std/io/mod.ts";
-import type { Reader, Writer } from "@std/io/types.d.ts";
+import type { Reader } from "@std/io/types.d.ts";
 
 const LF = "\n".charCodeAt(0);
 const BACKSLASH = "\\".charCodeAt(0);
 const SPACE = " ".charCodeAt(0);
+
+const META = 0x83;
+const META_MASK = 0b100000;
+const META_CHARS = (function () {
+  const NULL = 0x0;
+  const MARKER = 0xA2;
+  const POUND = 0x84;
+  const LAST_NORMAL_TOK = 0x9c;
+  const SNULL = 0x9d;
+  const NULARG = 0xA1;
+
+  const metaChars = [NULL, META, MARKER];
+
+  for (let t = POUND; t <= LAST_NORMAL_TOK; t++) {
+    metaChars.push(t);
+  }
+
+  for (let t = SNULL; t <= NULARG; t++) {
+    metaChars.push(t);
+  }
+
+  return metaChars;
+})();
+
+// imeta
+// inittyptab
+function isMetaChar(c: number): boolean {
+  return META_CHARS.includes(c);
+}
+
+export function metafy(str: Uint8Array): Uint8Array {
+  const buf: number[] = [];
+
+  for (let i = 0; i < str.length; i++) {
+    const current = str[i];
+
+    if (!isMetaChar(current)) {
+      buf.push(current);
+      continue;
+    }
+
+    buf.push(META);
+    buf.push(current ^ META_MASK);
+  }
+
+  return Uint8Array.from(buf);
+}
+
+export function unmetafy(str: Uint8Array): Uint8Array {
+  const buf: number[] = [];
+
+  for (let i = 0; i < str.length; i++) {
+    const current = str[i];
+    const next = i < str.length - 1 ? str[i + 1] : 0;
+
+    if (current === META) {
+      if (next === 0) {
+        throw new Error("unreachable");
+      }
+      buf.push(next ^ META_MASK);
+      i++; // skip
+      continue;
+    }
+    buf.push(current);
+  }
+
+  return Uint8Array.from(buf);
+}
 
 export interface HistoryEntry {
   command: string;

@@ -6,7 +6,7 @@ import {
   parseHistoryLine,
   readHistoryLines,
   unmetafy,
-} from "./zsh-history.ts";
+} from "./zsh.ts";
 
 function fromString(str: string): Uint8Array {
   const encoder = new TextEncoder();

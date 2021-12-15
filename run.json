@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "deno run --allow-read --import-map=./import_map.json ./zsh-history.ts",
+    "start": "deno run --allow-read --import-map=./import_map.json ./bin/main.ts",
     "test": "deno --unstable test --import-map=./import_map.json"
   }
 }

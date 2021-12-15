@@ -1,10 +1,14 @@
 import { Buffer, BufReader } from "@std/io/buffer.ts";
 import { StringReader } from "@std/io/mod.ts";
 import type { Reader } from "@std/io/types.d.ts";
+import { Buffer as NodeBuffer } from "@std/node/buffer.ts";
+import { Parser } from "binary-parser";
 
 const LF = "\n".charCodeAt(0);
 const BACKSLASH = "\\".charCodeAt(0);
 const SPACE = " ".charCodeAt(0);
+const COLON = ":".charCodeAt(0);
+const SEMICOLON = ";".charCodeAt(0);
 
 const META = 0x83;
 const META_MASK = 0b100000;
@@ -109,6 +113,42 @@ export function historyEntriesToBytes(entry: HistoryEntry): Uint8Array {
   return Uint8Array.from(buffer);
 }
 
+const historyLineParser = new Parser()
+  .nest("_header", {
+    type: new Parser()
+      .uint8("_colon", { assert: COLON })
+      .uint8("_space", { assert: SPACE }),
+  })
+  .array("startTime", {
+    type: "uint8",
+    readUntil: (item) => item === COLON,
+  })
+  .array("duration", {
+    type: "uint8",
+    readUntil: (item) => item === SEMICOLON,
+  })
+  .buffer("command", {
+    readUntil: "eof",
+  });
+
+export function parseHistoryLine(line: Uint8Array): HistoryEntry | null {
+  try {
+    const parsed = historyLineParser.parse(NodeBuffer.from(line));
+
+    const d = new TextDecoder("utf-8");
+    const startTime = parseInt(d.decode(Uint8Array.from(parsed.startTime)), 10);
+    const duration = parseInt(d.decode(Uint8Array.from(parsed.duration)), 10);
+    return {
+      command: d.decode(unmetafy(parsed.command)),
+      startTime,
+      finishTime: startTime + duration,
+    };
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
 // line separator: CRLF or LF
 async function* readLines(reader: Reader): AsyncGenerator<Uint8Array> {
   const bufReader = BufReader.create(reader);
@@ -176,9 +216,8 @@ async function main() {
   }
   const file = await Deno.open(givenPath, { read: true });
 
-  const d = new TextDecoder("utf-8");
   for await (const line of readHistoryLines(file)) {
-    console.log("[History Entry]", d.decode(line));
+    console.log(JSON.stringify(parseHistoryLine(line), null, 2));
   }
 }
 

@@ -2,8 +2,8 @@ import { assertEquals } from "@std/testing/asserts.ts";
 import { StringReader } from "@std/io/mod.ts";
 import {
   historyEntriesToBytes,
-  HistoryEntry,
   metafy,
+  parseHistoryLine,
   readHistoryLines,
   unmetafy,
 } from "./zsh-history.ts";
@@ -66,26 +66,46 @@ Deno.test("unmetafy", async (t) => {
   }
 });
 
-Deno.test("simple entry", () => {
-  const entry: HistoryEntry = {
-    command: "sleep 2",
-    startTime: 1639320933,
-    finishTime: 1639320935,
-  };
-  const encoded = historyEntriesToBytes(entry);
+const historyLineTests = [
+  {
+    name: "simple entry",
+    entry: {
+      command: "sleep 2",
+      startTime: 1639320933,
+      finishTime: 1639320935,
+    },
+    line: ": 1639320933:2;sleep 2\n",
+  },
+  {
+    name: "multi line entry",
+    entry: {
+      command: "echo one \\\n  echo two",
+      startTime: 1111,
+      finishTime: 1111,
+    },
+    line: ": 1111:0;echo one \\\\\n  echo two\n",
+  },
+];
 
-  assertEquals(toString(encoded), ": 1639320933:2;sleep 2\n");
+Deno.test("historyEntriesToBytes", async (t) => {
+  for (const tt of historyLineTests) {
+    await t.step(tt.name, () => {
+      const encoded = historyEntriesToBytes(tt.entry);
+      assertEquals(toString(encoded), tt.line);
+    });
+  }
 });
 
-Deno.test("multi line entry", () => {
-  const entry: HistoryEntry = {
-    command: "echo one \\\n  echo two",
-    startTime: 1111,
-    finishTime: 1111,
-  };
-  const encoded = historyEntriesToBytes(entry);
-
-  assertEquals(toString(encoded), ": 1111:0;echo one \\\\\n  echo two\n");
+Deno.test("parseHistoryLine", async (t) => {
+  for (const tt of historyLineTests) {
+    await t.step(tt.name, async () => {
+      const r = new StringReader(tt.line);
+      const lines = await genToArray(readHistoryLines(r));
+      assertEquals(lines.length, 1);
+      const entry = parseHistoryLine(fromString(lines[0]));
+      assertEquals(entry, tt.entry);
+    });
+  }
 });
 
 Deno.test("simple", async () => {

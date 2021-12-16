@@ -84,7 +84,7 @@ export interface HistoryEntry {
   finishTime: number;
 }
 
-export function historyEntriesToBytes(entry: HistoryEntry): Uint8Array {
+export function historyEntryToBytes(entry: HistoryEntry): Uint8Array {
   const duration = entry.finishTime - entry.startTime;
   if (duration < 0) {
     throw new Error("negative duration detected");

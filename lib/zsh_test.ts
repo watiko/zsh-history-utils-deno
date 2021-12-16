@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/testing/asserts.ts";
 import { StringReader } from "@std/io/mod.ts";
 import {
-  historyEntriesToBytes,
+  historyEntryToBytes,
   metafy,
   parseHistoryLine,
   readHistoryLines,
@@ -90,7 +90,7 @@ const historyLineTests = [
 Deno.test("historyEntriesToBytes", async (t) => {
   for (const tt of historyLineTests) {
     await t.step(tt.name, () => {
-      const encoded = historyEntriesToBytes(tt.entry);
+      const encoded = historyEntryToBytes(tt.entry);
       assertEquals(toString(encoded), tt.line);
     });
   }

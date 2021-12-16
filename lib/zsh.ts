@@ -1,8 +1,9 @@
-import { Buffer, BufReader } from "@std/io/buffer.ts";
+import { Buffer } from "@std/io/buffer.ts";
 import { StringReader } from "@std/io/mod.ts";
 import type { Reader } from "@std/io/types.d.ts";
 import { Buffer as NodeBuffer } from "@std/node/buffer.ts";
 import { Parser } from "binary-parser";
+import { readLines } from "./buffer.ts";
 
 const LF = "\n".charCodeAt(0);
 const BACKSLASH = "\\".charCodeAt(0);
@@ -146,28 +147,6 @@ export function parseHistoryLine(line: Uint8Array): HistoryEntry | null {
   } catch (e) {
     console.error(e);
     return null;
-  }
-}
-
-// line separator: CRLF or LF
-async function* readLines(reader: Reader): AsyncGenerator<Uint8Array> {
-  const bufReader = BufReader.create(reader);
-  const buffer = new Buffer();
-
-  while (true) {
-    const res = await bufReader.readLine();
-    if (res === null) {
-      if (!buffer.empty()) {
-        yield buffer.bytes({ copy: false });
-      }
-      break;
-    }
-
-    await buffer.write(res.line);
-    if (!res.more) {
-      yield buffer.bytes({ copy: false });
-      buffer.reset();
-    }
   }
 }
 

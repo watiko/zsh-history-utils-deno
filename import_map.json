@@ -1,5 +1,6 @@
 {
   "imports": {
+    "@rimbu/sorted/": "https://deno.land/x/rimbu@0.7.3/sorted/",
     "@std/io/": "https://deno.land/std@0.117.0/io/",
     "@std/node/": "https://deno.land/std@0.117.0/node/",
     "@std/testing/": "https://deno.land/std@0.117.0/testing/",

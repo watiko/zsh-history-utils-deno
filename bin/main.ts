@@ -1,16 +1,14 @@
-import { parseHistoryLine, readHistoryLines } from "../lib/zsh.ts";
+import { MainComand } from "../lib/command/main.ts";
+import { DecodeComand } from "../lib/command/decode.ts";
+import { EncodeComand } from "../lib/command/encode.ts";
 
 async function main() {
-  const givenPath = Deno.args[0];
-  if (givenPath === undefined) {
-    console.error("path is not passed");
-    Deno.exit(1);
-  }
-  const file = await Deno.open(givenPath, { read: true });
+  const cmd = new MainComand().build();
 
-  for await (const line of readHistoryLines(file)) {
-    console.log(JSON.stringify(parseHistoryLine(line), null, 2));
-  }
+  cmd.command("decode", new DecodeComand().build());
+  cmd.command("encode", new EncodeComand().build());
+
+  await cmd.parse(Deno.args);
 }
 
 if (import.meta.main) {

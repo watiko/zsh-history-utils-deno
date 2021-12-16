@@ -4,6 +4,7 @@ import type { Reader } from "@std/io/types.d.ts";
 import { Buffer as NodeBuffer } from "@std/node/buffer.ts";
 import { Parser } from "binary-parser";
 import { readLines } from "./buffer.ts";
+import * as z from "zod/mod.ts";
 
 const LF = "\n".charCodeAt(0);
 const BACKSLASH = "\\".charCodeAt(0);
@@ -79,11 +80,13 @@ export function unmetafy(str: Uint8Array): Uint8Array {
   return Uint8Array.from(buf);
 }
 
-export interface HistoryEntry {
-  command: string;
-  startTime: number;
-  finishTime: number;
-}
+export const historyEntryParser = z.object({
+  command: z.string(),
+  startTime: z.number(),
+  finishTime: z.number(),
+});
+
+export type HistoryEntry = z.infer<typeof historyEntryParser>;
 
 export function historyEntryToBytes(entry: HistoryEntry): Uint8Array {
   const duration = entry.finishTime - entry.startTime;

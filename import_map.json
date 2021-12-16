@@ -3,6 +3,8 @@
     "@std/io/": "https://deno.land/std@0.117.0/io/",
     "@std/node/": "https://deno.land/std@0.117.0/node/",
     "@std/testing/": "https://deno.land/std@0.117.0/testing/",
-    "binary-parser": "https://esm.sh/binary-parser@2.0.2"
+    "binary-parser": "https://esm.sh/binary-parser@2.0.2",
+    "cliffy/command/": "https://deno.land/x/cliffy@v0.20.1/command/",
+    "zod/": "https://deno.land/x/zod@v3.11.6/"
   }
 }

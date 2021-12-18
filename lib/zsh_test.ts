@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/testing/asserts.ts";
-import { StringReader } from "@std/io/mod.ts";
+import { Buffer, StringReader } from "@std/io/mod.ts";
 import {
   historyEntryToBytes,
   metafy,
@@ -7,6 +7,12 @@ import {
   readHistoryLines,
   unmetafy,
 } from "./zsh.ts";
+
+function bytesToReader(bytes: Uint8Array): Buffer {
+  const buf = new Buffer();
+  buf.writeSync(bytes);
+  return buf;
+}
 
 function fromString(str: string): Uint8Array {
   const encoder = new TextEncoder();
@@ -18,10 +24,12 @@ function toString(arr: Uint8Array): string {
   return decoder.decode(arr);
 }
 
-async function genToArray(gen: AsyncIterable<Uint8Array>): Promise<string[]> {
-  const ret: string[] = [];
+async function genToArray(
+  gen: AsyncIterable<Uint8Array>,
+): Promise<Uint8Array[]> {
+  const ret: Uint8Array[] = [];
   for await (const x of gen) {
-    ret.push(toString(x));
+    ret.push(Uint8Array.from(x));
   }
   return ret;
 }
@@ -47,6 +55,17 @@ const metaTests = [
       191, 131, 177, 166
     ),
     unmetafied: fromString("👨‍👨‍👧‍👦"),
+  },
+  {
+    name: "penguin",
+    // deno-fmt-ignore
+    metafied: Uint8Array.of(
+      227, 131, 163, 131,
+      186, 227, 131, 163,
+      179, 227, 130, 174,
+      227, 131, 163, 179
+    ),
+    unmetafied: fromString("ペンギン"),
   },
 ];
 
@@ -85,13 +104,32 @@ const historyLineTests = [
     },
     line: ": 1111:0;echo one \\\\\n  echo two\n",
   },
+  {
+    name: "meta",
+    entry: {
+      command: "echo ペンギン",
+      startTime: 1,
+      finishTime: 1,
+    },
+    // deno-fmt-ignore
+    line: Uint8Array.of(
+       58,  32,  49,  58,  48,  59, 101,
+       99, 104, 111,  32, 227, 131, 163,
+      131, 186, 227, 131, 163, 179, 227,
+      130, 174, 227, 131, 163, 179,  10
+    ),
+  },
 ];
 
 Deno.test("historyEntriesToBytes", async (t) => {
   for (const tt of historyLineTests) {
     await t.step(tt.name, () => {
       const encoded = historyEntryToBytes(tt.entry);
-      assertEquals(toString(encoded), tt.line);
+      if (typeof tt.line === "string") {
+        assertEquals(toString(encoded), tt.line);
+      } else {
+        assertEquals(encoded, tt.line);
+      }
     });
   }
 });
@@ -99,10 +137,12 @@ Deno.test("historyEntriesToBytes", async (t) => {
 Deno.test("parseHistoryLine", async (t) => {
   for (const tt of historyLineTests) {
     await t.step(tt.name, async () => {
-      const r = new StringReader(tt.line);
+      const r = typeof tt.line === "string"
+        ? new StringReader(tt.line)
+        : bytesToReader(tt.line);
       const lines = await genToArray(readHistoryLines(r));
       assertEquals(lines.length, 1);
-      const entry = parseHistoryLine(fromString(lines[0]));
+      const entry = parseHistoryLine(lines[0]);
       assertEquals(entry, tt.entry);
     });
   }
@@ -122,7 +162,8 @@ Deno.test("simple", async () => {
   ];
 
   const r = new StringReader(histories);
-  const lines = await genToArray(readHistoryLines(r));
+  const lines = await genToArray(readHistoryLines(r))
+    .then((lines) => lines.map(toString));
 
   assertEquals(lines, expected);
 });
@@ -149,7 +190,8 @@ Deno.test("multiple lines", async () => {
   ];
 
   const r = new StringReader(histories);
-  const lines = await genToArray(readHistoryLines(r));
+  const lines = await genToArray(readHistoryLines(r))
+    .then((lines) => lines.map(toString));
 
   assertEquals(lines, expected);
 });

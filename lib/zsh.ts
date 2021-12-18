@@ -1,5 +1,4 @@
-import { Buffer } from "@std/io/buffer.ts";
-import { StringReader } from "@std/io/mod.ts";
+import { Buffer } from "@std/io/mod.ts";
 import type { Reader } from "@std/io/types.d.ts";
 import { Buffer as NodeBuffer } from "@std/node/buffer.ts";
 import { Parser } from "binary-parser";
@@ -94,27 +93,29 @@ export function historyEntryToBytes(entry: HistoryEntry): Uint8Array {
     throw new Error("negative duration detected");
   }
 
-  const header = `: ${entry.startTime}:${duration};`;
-  const line = `${header}${entry.command}`;
+  const readBuf = new Buffer();
+  const encoder = new TextEncoder();
 
-  const reader = new StringReader(line);
-  const buffer: number[] = [];
+  readBuf.writeSync(encoder.encode(`: ${entry.startTime}:${duration};`));
+  readBuf.writeSync(metafy(encoder.encode(entry.command)));
+
+  const buf: number[] = [];
   let endBackslashed = false;
-  for (const t of reader.bytes({ copy: false })) {
+  for (const t of readBuf.bytes({ copy: false })) {
     endBackslashed = t === BACKSLASH || (endBackslashed && t == SPACE);
 
     if (t === LF) {
-      buffer.push(BACKSLASH);
+      buf.push(BACKSLASH);
     }
-    buffer.push(t);
+    buf.push(t);
   }
 
   if (endBackslashed) {
-    buffer.push(SPACE);
+    buf.push(SPACE);
   }
-  buffer.push(LF);
+  buf.push(LF);
 
-  return Uint8Array.from(buffer);
+  return Uint8Array.from(buf);
 }
 
 const historyLineParser = new Parser()

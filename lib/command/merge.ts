@@ -1,8 +1,13 @@
 import { Command } from "cliffy/command/mod.ts";
-import BTree from 'sorted-btree';
+import BTree from "sorted-btree";
 
 import { CommandBuilder } from "./builder.ts";
-import { parseHistoryLine, readHistoryLines } from "../zsh.ts";
+import {
+  HistoryEntry,
+  historyEntryToBytes,
+  parseHistoryLine,
+  readHistoryLines,
+} from "../zsh.ts";
 
 export class MergeComand implements CommandBuilder {
   build() {
@@ -16,7 +21,7 @@ export class MergeComand implements CommandBuilder {
 }
 
 async function printMergedHistories(historyFilePaths: string[]) {
-  const linesMap = new BTree<number, Uint8Array[]>();
+  const linesMap = new BTree<number, HistoryEntry[]>();
 
   for (const filePath of historyFilePaths) {
     const file = await Deno.open(filePath, { read: true });
@@ -29,15 +34,13 @@ async function printMergedHistories(historyFilePaths: string[]) {
 
       const key = entry.startTime;
       const lines = linesMap.get(key) ?? [];
-      linesMap.set(key, [...lines, Uint8Array.from(line)]);
+      linesMap.set(key, [...lines, entry]);
     }
   }
 
-  const LF = "\n".charCodeAt(0);
   for (const lines of linesMap.values()) {
     for (const line of lines) {
-      await Deno.stdout.write(line);
-      await Deno.stdout.write(Uint8Array.of(LF));
+      await Deno.stdout.write(historyEntryToBytes(line));
     }
   }
 }

@@ -16,10 +16,12 @@ export class DecodeComand implements CommandBuilder {
 }
 
 async function printHistoryEntries(filePath: string, pretty: boolean) {
-  const file = await Deno.open(filePath, { read: true });
+  const input = filePath === "-"
+    ? Deno.stdin
+    : await Deno.open(filePath, { read: true });
   const indent = pretty ? 2 : 0;
 
-  for await (const line of readHistoryLines(file)) {
+  for await (const line of readHistoryLines(input)) {
     console.log(JSON.stringify(parseHistoryLine(line), null, indent));
   }
 }

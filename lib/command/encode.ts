@@ -16,10 +16,12 @@ export class EncodeComand implements CommandBuilder {
 }
 
 async function printHistories(filePath: string) {
-  const file = await Deno.open(filePath, { read: true });
+  const input = filePath === "-"
+    ? Deno.stdin
+    : await Deno.open(filePath, { read: true });
 
   const d = new TextDecoder("utf-8");
-  for await (const line of readLines(file)) {
+  for await (const line of readLines(input)) {
     const json = JSON.parse(d.decode(line));
     const result = historyEntryParser.safeParse(json);
 

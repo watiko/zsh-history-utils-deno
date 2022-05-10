@@ -1,6 +1,7 @@
 {
   "tasks": {
     "dev": "deno run --no-check --allow-read --import-map=./import_map.json ./bin/main.ts",
+    "check": "deno check --import-map=./import_map.json ./bin/main.ts",
     "start": "deno run --allow-read --import-map=./import_map.json ./bin/main.ts",
     "test": "deno --unstable test --import-map=./import_map.json",
     "install": "deno install --v8-flags=--noopt -f --name zsh-history-utils --no-check --allow-read --import-map=./import_map.json ./bin/main.ts",

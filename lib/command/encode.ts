@@ -4,7 +4,7 @@ import { CommandBuilder } from "./builder.ts";
 import { historyEntryParser, historyEntryToBytes } from "../zsh.ts";
 import { readLines } from "../buffer.ts";
 
-export class EncodeComand implements CommandBuilder {
+export class EncodeCommand implements CommandBuilder {
   build() {
     return new Command<void>()
       .description("convert json lines into zsh's history")

@@ -3,7 +3,7 @@ import { Command } from "cliffy/command/mod.ts";
 import { CommandBuilder } from "./builder.ts";
 import { parseHistoryLine, readHistoryLines } from "../zsh.ts";
 
-export class DecodeComand implements CommandBuilder {
+export class DecodeCommand implements CommandBuilder {
   build() {
     return new Command<void>()
       .description("convert zsh's history into json lines")

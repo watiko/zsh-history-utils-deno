@@ -1,14 +1,14 @@
-import { MainComand } from "../lib/command/main.ts";
-import { DecodeComand } from "../lib/command/decode.ts";
-import { EncodeComand } from "../lib/command/encode.ts";
-import { MergeComand } from "../lib/command/merge.ts";
+import { MainCommand } from "../lib/command/main.ts";
+import { DecodeCommand } from "../lib/command/decode.ts";
+import { EncodeCommand } from "../lib/command/encode.ts";
+import { MergeCommand } from "../lib/command/merge.ts";
 
 async function main() {
-  const cmd = new MainComand().build();
+  const cmd = new MainCommand().build();
 
-  cmd.command("decode", new DecodeComand().build());
-  cmd.command("encode", new EncodeComand().build());
-  cmd.command("merge", new MergeComand().build());
+  cmd.command("decode", new DecodeCommand().build());
+  cmd.command("encode", new EncodeCommand().build());
+  cmd.command("merge", new MergeCommand().build());
 
   await cmd.parse(Deno.args);
 }

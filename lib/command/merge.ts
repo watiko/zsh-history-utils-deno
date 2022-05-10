@@ -9,7 +9,7 @@ import {
   readHistoryLines,
 } from "../zsh.ts";
 
-export class MergeComand implements CommandBuilder {
+export class MergeCommand implements CommandBuilder {
   build() {
     return new Command<void>()
       .description("merge zsh's history files into one zsh's history file")

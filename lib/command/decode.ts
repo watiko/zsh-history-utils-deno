@@ -7,8 +7,8 @@ export class DecodeCommand implements CommandBuilder {
   build() {
     return new Command<void>()
       .description("convert zsh's history into json lines")
-      .arguments<[string]>("<historyFilePath:string>")
-      .option<{ pretty?: boolean }>("--pretty", "prettify output json")
+      .arguments("<historyFilePath:string>")
+      .option("--pretty", "prettify output json")
       .action((opts, historyFilePath) => {
         return printHistoryEntries(historyFilePath, opts.pretty ?? false);
       });

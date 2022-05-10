@@ -8,7 +8,7 @@ export class EncodeCommand implements CommandBuilder {
   build() {
     return new Command<void>()
       .description("convert json lines into zsh's history")
-      .arguments<[string]>("<decodedHistoryFilePath:string>")
+      .arguments("<decodedHistoryFilePath:string>")
       .action((_opts, historyFilePath) => {
         return printHistories(historyFilePath);
       });

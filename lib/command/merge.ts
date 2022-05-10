@@ -13,7 +13,7 @@ export class MergeCommand implements CommandBuilder {
   build() {
     return new Command<void>()
       .description("merge zsh's history files into one zsh's history file")
-      .arguments<[string[]]>("<...historyFiles:string>")
+      .arguments("<...historyFiles:string>")
       .action((_opts, historyFilePaths) => {
         return printMergedHistories(historyFilePaths);
       });

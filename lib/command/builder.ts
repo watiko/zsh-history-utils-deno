@@ -1,5 +1,6 @@
 import { Command } from "cliffy/command/mod.ts";
 
 export interface CommandBuilder {
-  build(): Command;
+  // deno-lint-ignore no-explicit-any
+  build(): Command<any>;
 }

@@ -15,9 +15,7 @@ $ deno install -f --name zsh-history-utils --no-check --allow-read \
 
 ## development
 
-- [trex](https://github.com/crewdevio/Trex)
-
 ```
-$ trex run dev --help
-$ trex run install
+$ deno task dev --help
+$ deno task install
 ```

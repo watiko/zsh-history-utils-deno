@@ -1,11 +1,11 @@
 {
   "importMap": "import_map.json",
   "tasks": {
-    "dev": "deno run --no-check --allow-read ./bin/main.ts",
-    "check": "deno check ./bin/main.ts",
-    "start": "deno run --allow-read ./bin/main.ts",
+    "dev": "deno run --no-check --allow-read ./cli.ts",
+    "check": "deno check ./cli.ts",
+    "start": "deno run --allow-read ./cli.ts",
     "test": "deno --unstable test",
-    "install": "deno install --v8-flags=--noopt -f --name zsh-history-utils --no-check --allow-read ./bin/main.ts",
+    "install": "deno install --v8-flags=--noopt -f --name zsh-history-utils --no-check --allow-read ./cli.ts",
     "uninstall": "deno uninstall zsh-history-utils"
   }
 }

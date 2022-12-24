@@ -1,7 +1,7 @@
-import { MainCommand } from "../lib/command/main.ts";
-import { DecodeCommand } from "../lib/command/decode.ts";
-import { EncodeCommand } from "../lib/command/encode.ts";
-import { MergeCommand } from "../lib/command/merge.ts";
+import { MainCommand } from "./lib/command/main.ts";
+import { DecodeCommand } from "./lib/command/decode.ts";
+import { EncodeCommand } from "./lib/command/encode.ts";
+import { MergeCommand } from "./lib/command/merge.ts";
 
 async function main() {
   const cmd = new MainCommand().build();

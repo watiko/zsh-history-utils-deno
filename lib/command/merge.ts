@@ -1,5 +1,5 @@
 import { Command } from "cliffy/command/mod.ts";
-import BTree from "sorted-btree";
+import BTreeImport from "sorted-btree";
 
 import { CommandBuilder } from "./builder.ts";
 import {
@@ -8,6 +8,9 @@ import {
   parseHistoryLine,
   readHistoryLines,
 } from "../zsh.ts";
+
+// https://github.com/denoland/deno/issues/16475
+const BTree = (BTreeImport as unknown as typeof BTreeImport["default"]);
 
 export class MergeCommand implements CommandBuilder {
   build() {

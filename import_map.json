@@ -3,9 +3,9 @@
     "@std/io/": "https://deno.land/std@0.170.0/io/",
     "@std/node/": "https://deno.land/std@0.170.0/node/",
     "@std/testing/": "https://deno.land/std@0.170.0/testing/",
-    "binary-parser": "https://esm.sh/binary-parser@2.2.1",
+    "binary-parser": "npm:binary-parser@2.2.1",
     "cliffy/command/": "https://deno.land/x/cliffy@v0.25.6/command/",
-    "sorted-btree": "https://esm.sh/sorted-btree@1.8.1",
+    "sorted-btree": "npm:sorted-btree@1.8.1",
     "zod/": "https://deno.land/x/zod@v3.20.2/"
   }
 }
